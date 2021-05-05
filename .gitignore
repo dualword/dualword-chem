@@ -1,0 +1,10 @@
+
+/.cproject
+/.project
+/.externalToolBuilders
+/.settings
+
+dualword-chem
+.build
+Makefile
+
