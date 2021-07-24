@@ -70,6 +70,7 @@ public slots:
 	void last();
 	void deleteAll();
 	void loadMolecule(const QSharedPointer<ROMol>&);
+	void log(const QString&);
 
 private:
 	void refresh();

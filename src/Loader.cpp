@@ -43,7 +43,7 @@ void Loader::run(){
 	emit showMessage(" Loading:" + name, 0);
 	int i = 0, count = 0, err = 0;
 	SDMolSupplier suppl(name.toStdString());
-	 while (!stop && !suppl.atEnd()) {
+	while (!stop && !suppl.atEnd()) {
 		try{
 			QSharedPointer<ROMol> m(suppl.next());
 			++count;
@@ -53,11 +53,14 @@ void Loader::run(){
 			}
 			emit loadMolecule(m);
 			++i;
-		} catch (const MolSanitizeException& e) {
+		} catch (const MolSanitizeException &e) {
 			++err;
+			 //emit errMessage(" Err:" + QString(e.message()));
+			 std::cout << "err" << e.message() << std::endl;
 			continue;
 		}
 	}
-	 //+" Err:"+QString::number(err) + " Loaded:" +	QString::number(i)
-	 emit showMessage("Total:"+QString::number(count) + " File:" + name, 5000);
+	QString msg("Loaded:"+QString::number(count) +" Err:"+QString::number(err) + " File:" + name);
+	emit showMessage(msg, 5000);
+	emit errMessage(msg);
 }

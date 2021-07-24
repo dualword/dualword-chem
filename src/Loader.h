@@ -40,6 +40,7 @@ public:
 signals:
 	void loadMolecule(const QSharedPointer<ROMol>&);
 	void showMessage(const QString&, int);
+	void errMessage(const QString&);
 
 protected:
      void run();

@@ -60,14 +60,17 @@ MainWindow::MainWindow(QWidget *p, Qt::WindowFlags f) : QMainWindow(p, f), idx(0
 	svg->setFocusPolicy(Qt::StrongFocus);
 	actionImportSDF->setIcon(style()->standardIcon(QStyle::SP_FileDialogStart, 0, this));
 	actionImportSmiles->setIcon(style()->standardIcon(QStyle::SP_FileIcon, 0, this));
-	actionHideSmiles->setIcon(style()->standardIcon(QStyle::SP_ToolBarHorizontalExtensionButton, 0, this));
+	actionSmiles->setIcon(style()->standardIcon(QStyle::SP_ToolBarHorizontalExtensionButton, 0, this));
+	actionConsole->setIcon(style()->standardIcon(QStyle::SP_FileDialogContentsView, 0, this));
+	console->setVisible(false);
 	actionDeleteAll->setIcon(style()->standardIcon(QStyle::SP_TrashIcon, 0, this));
 	actionAbout->setIcon(style()->standardIcon(QStyle::SP_FileDialogInfoView, 0, this));
     connect(actionImportSDF,SIGNAL(triggered()), SLOT(importSDF()));
     connect(actionImportSmiles,SIGNAL(triggered()), SLOT(importSmiles()));
-    connect(actionHideSmiles,SIGNAL(toggled(bool)), smiles, SLOT(setVisible(bool)));
+    connect(actionSmiles,SIGNAL(toggled(bool)), smiles, SLOT(setVisible(bool)));
     connect(actionDeleteAll,SIGNAL(triggered()), SLOT(deleteAll()));
     connect(actionAbout,SIGNAL(triggered()), SLOT(showAbout()));
+    connect(actionConsole,SIGNAL(toggled(bool)), console, SLOT(setVisible(bool)));
 	QStringList list;
 	list.push_back("Property");
 	list.push_back("Value");
@@ -204,13 +207,13 @@ void MainWindow::showAbout(){
 	str.append(" ").append(qApp->applicationVersion()).append("<br>");
 	str.append("License: GPL v3 <br/>");
 	str.append("Website: <a href='http://github.com/dualword/dualword-chem'>Dualword-chem</a> <br/>");
-	str.append("&copy;2019 Alexander Busorgin <br/>");
+	str.append("&copy;2021 Alexander Busorgin <br/>");
 	QMessageBox::about(this, tr("About"), str );
 }
 
 void MainWindow::importSmiles(){
 	bool ok;
-	QString text = QInputDialog::getText(this, tr("QInputDialog::getText()"),
+	QString text = QInputDialog::getText(this, 0,
 								tr("Enter SMILES"), QLineEdit::Normal, "", &ok);
 
 	if (ok && !text.isEmpty()){
@@ -242,10 +245,11 @@ void MainWindow::importSDF(){
         if(loader.isNull() || !loader->isRunning()){
         	loader.reset(new Loader(fname));
         	connect(loader.data(),SIGNAL(finished()), SLOT(back()));
-        	connect(loader.data(),SIGNAL(loadMolecule(const  QSharedPointer<ROMol>)),
-        			SLOT(loadMolecule(const QSharedPointer<ROMol>)));
+        	connect(loader.data(),SIGNAL(loadMolecule(const  QSharedPointer<ROMol>&)),
+        			SLOT(loadMolecule(const QSharedPointer<ROMol>&)));
         	connect(loader.data(),SIGNAL(showMessage(const QString&,int)),
         			statusbar, SLOT(showMessage(const QString&,int)));
+        	connect(loader.data(),SIGNAL(errMessage(const QString&)), SLOT(log(const QString&)));
         	loader->start();
         }
     }
@@ -327,4 +331,8 @@ void MainWindow::addElements(const ROMol* m, const double& mw){
 	    		 QString::number(i.value()).append(" (")
 				 .append(QString::number(i.value()/mw*100)).append(" %)"), true);
 	 }
+}
+
+void MainWindow::log(const QString& str){
+	console->appendPlainText(str);
 }

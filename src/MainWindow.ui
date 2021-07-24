@@ -20,7 +20,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,4,1,1">
     <item>
      <widget class="QLineEdit" name="smiles">
       <property name="readOnly">
@@ -44,7 +44,7 @@
            <x>0</x>
            <y>0</y>
            <width>385</width>
-           <height>221</height>
+           <height>131</height>
           </rect>
          </property>
          <property name="contextMenuPolicy">
@@ -148,6 +148,16 @@
       </item>
      </layout>
     </item>
+    <item>
+     <widget class="QPlainTextEdit" name="console">
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+      <property name="maximumBlockCount">
+       <number>1000</number>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -176,8 +186,11 @@
    </attribute>
    <addaction name="actionImportSDF"/>
    <addaction name="actionImportSmiles"/>
-   <addaction name="actionHideSmiles"/>
    <addaction name="actionDeleteAll"/>
+   <addaction name="separator"/>
+   <addaction name="actionSmiles"/>
+   <addaction name="actionConsole"/>
+   <addaction name="separator"/>
    <addaction name="actionAbout"/>
   </widget>
   <action name="actionImportSDF">
@@ -196,15 +209,15 @@
     <string>Import SMILES</string>
    </property>
   </action>
-  <action name="actionHideSmiles">
+  <action name="actionSmiles">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>hideSmiles</string>
+    <string>Smiles</string>
    </property>
    <property name="toolTip">
-    <string>Hide SMILES</string>
+    <string>SMILES</string>
    </property>
   </action>
   <action name="actionAbout">
@@ -221,6 +234,17 @@
    </property>
    <property name="toolTip">
     <string>Delete</string>
+   </property>
+  </action>
+  <action name="actionConsole">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Console</string>
+   </property>
+   <property name="toolTip">
+    <string>Console</string>
    </property>
   </action>
  </widget>
