@@ -31,6 +31,8 @@
 #include <GraphMol/MolDraw2D/MolDraw2DSVG.h>
 #include <GraphMol/Descriptors/MolDescriptors.h>
 #include <GraphMol/FileParsers/MolFileStereochem.h>
+#include <GraphMol/Fingerprints/Fingerprints.h>
+#include <DataStructs/BitOps.h>
 
 Q_DECLARE_METATYPE(QSharedPointer<ROMol>)
 
@@ -51,7 +53,9 @@ QString Mol<T>::getSvg(int w, int h){
 	return QString::fromStdString(s.getDrawingText());
 }
 
-MainWindow::MainWindow(QWidget *p, Qt::WindowFlags f) : QMainWindow(p, f), idx(0), mol(0), loader(nullptr) {
+MainWindow::MainWindow(QWidget *p, Qt::WindowFlags f) : QMainWindow(p, f), idx(0), mol(0), loader(nullptr),
+		molSim(nullptr) {
+
 	setupUi(this);
 	qRegisterMetaType<QSharedPointer<ROMol>>("ROMol");
 	setWindowTitle(qApp->applicationName());
@@ -62,6 +66,7 @@ MainWindow::MainWindow(QWidget *p, Qt::WindowFlags f) : QMainWindow(p, f), idx(0
 	actionImportSmiles->setIcon(style()->standardIcon(QStyle::SP_FileIcon, 0, this));
 	actionSmiles->setIcon(style()->standardIcon(QStyle::SP_ToolBarHorizontalExtensionButton, 0, this));
 	actionConsole->setIcon(style()->standardIcon(QStyle::SP_FileDialogContentsView, 0, this));
+	actSim->setIcon(style()->standardIcon(QStyle::SP_FileLinkIcon, 0, this));
 	console->setVisible(false);
 	actionDeleteAll->setIcon(style()->standardIcon(QStyle::SP_TrashIcon, 0, this));
 	actionAbout->setIcon(style()->standardIcon(QStyle::SP_FileDialogInfoView, 0, this));
@@ -71,6 +76,7 @@ MainWindow::MainWindow(QWidget *p, Qt::WindowFlags f) : QMainWindow(p, f), idx(0
     connect(actionDeleteAll,SIGNAL(triggered()), SLOT(deleteAll()));
     connect(actionAbout,SIGNAL(triggered()), SLOT(showAbout()));
     connect(actionConsole,SIGNAL(toggled(bool)), console, SLOT(setVisible(bool)));
+    connect(actSim,SIGNAL(triggered()), SLOT(setMol()));
 	QStringList list;
 	list.push_back("Property");
 	list.push_back("Value");
@@ -213,8 +219,7 @@ void MainWindow::showAbout(){
 
 void MainWindow::importSmiles(){
 	bool ok;
-	QString text = QInputDialog::getText(this, 0,
-								tr("Enter SMILES"), QLineEdit::Normal, "", &ok);
+	QString text = QInputDialog::getText(this, 0, tr("Enter SMILES"), QLineEdit::Normal, "", &ok);
 
 	if (ok && !text.isEmpty()){
 		try{
@@ -227,6 +232,26 @@ void MainWindow::importSmiles(){
 			list.push_back(m);
 			idx = list.size()-1;
 			refresh();
+		} catch (const MolSanitizeException& e) {
+			QMessageBox::critical(this, tr("MolSanitizeException"), QString(e.message()) );
+			return;
+		}
+	}
+}
+
+void MainWindow::setMol(){
+	bool ok;
+	QString text = QInputDialog::getText(this, 0, tr("Enter SMILES"), QLineEdit::Normal, "", &ok);
+
+	if (ok && !text.isEmpty()){
+		try{
+			QScopedPointer<RWMol> mol(SmilesToMol(text.toStdString()));
+			molSim.reset(new Mol<ROMol>(text, mol.take()));
+			if(!molSim->getMol()){
+				QMessageBox::critical(this, tr("Error"), "Not valid SMILES string." );
+				return;
+			}
+			svg2->load(molSim->getSvg(scrollArea2->rect().width(),scrollArea2->rect().height()).toUtf8());
 		} catch (const MolSanitizeException& e) {
 			QMessageBox::critical(this, tr("MolSanitizeException"), QString(e.message()) );
 			return;
@@ -283,6 +308,11 @@ void MainWindow::refresh(){
 	lbl->setText(QString::number(idx+1)+ "/" +  QString::number(list.size()));
 	mol = list.at(idx).data();
 	showMol();
+
+	if(molSim.isNull() || !molSim->getMol()) return;
+	ExplicitBitVect* fp1 = RDKit::RDKFingerprintMol(*molSim->getMol());
+	ExplicitBitVect* fp2 = RDKit::RDKFingerprintMol(*mol->getMol());
+	lblSim->setText(QString::number(TanimotoSimilarity(*fp1, *fp2),'g',3));
 }
 
 void MainWindow::deleteMol(){

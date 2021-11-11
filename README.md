@@ -4,6 +4,7 @@ Features:
  - supported formats: SDF, SMILES  
  - export to SVG  
  - molecular descriptors  
+ - calculation of chemical similarity  
 	
 Third Party Software:  
  - Qt 4.8.6 License: LGPL v2.1  
@@ -11,5 +12,6 @@ Third Party Software:
 
 License: GNU GENERAL PUBLIC LICENSE Version 3  
 Source code: http://github.com/dualword/dualword-chem  
+Files: http://sourceforge.net/projects/dualword-chem/ 
 
 ![Screenshot](etc/screenshot/dualword-chem.png)

@@ -56,7 +56,6 @@ void Loader::run(){
 		} catch (const MolSanitizeException &e) {
 			++err;
 			 //emit errMessage(" Err:" + QString(e.message()));
-			 std::cout << "err" << e.message() << std::endl;
 			continue;
 		}
 	}

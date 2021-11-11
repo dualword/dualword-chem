@@ -64,6 +64,7 @@ public slots:
 	void showMol();
 	void saveMol();
 	void deleteMol();
+	void setMol();
 	void back();
 	void next();
 	void first();
@@ -82,6 +83,7 @@ private:
 	QScopedPointer<Loader> loader;
 	int idx;
 	Mol<ROMol> *mol;
+	QScopedPointer<Mol<ROMol>> molSim;
 
 };
 
