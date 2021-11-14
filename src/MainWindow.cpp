@@ -53,8 +53,8 @@ QString Mol<T>::getSvg(int w, int h){
 	return QString::fromStdString(s.getDrawingText());
 }
 
-MainWindow::MainWindow(QWidget *p, Qt::WindowFlags f) : QMainWindow(p, f), idx(0), mol(0), loader(nullptr),
-		molSim(nullptr) {
+MainWindow::MainWindow(QWidget *p, Qt::WindowFlags f) : QMainWindow(p, f), loader(nullptr), idx(0),
+		mol(nullptr), molSim(nullptr) {
 
 	setupUi(this);
 	qRegisterMetaType<QSharedPointer<ROMol>>("ROMol");
@@ -252,6 +252,7 @@ void MainWindow::setMol(){
 				return;
 			}
 			svg2->load(molSim->getSvg(scrollArea2->rect().width(),scrollArea2->rect().height()).toUtf8());
+			refresh();
 		} catch (const MolSanitizeException& e) {
 			QMessageBox::critical(this, tr("MolSanitizeException"), QString(e.message()) );
 			return;
@@ -305,11 +306,12 @@ void MainWindow::last(){
 }
 
 void MainWindow::refresh(){
-	lbl->setText(QString::number(idx+1)+ "/" +  QString::number(list.size()));
-	mol = list.at(idx).data();
-	showMol();
-
-	if(molSim.isNull() || !molSim->getMol()) return;
+	if(list.size() > 0) {
+		lbl->setText(QString::number(idx+1)+ "/" +  QString::number(list.size()));
+		mol = list.at(idx).data();
+		showMol();
+	}
+	if(molSim.isNull() || !mol) return;
 	ExplicitBitVect* fp1 = RDKit::RDKFingerprintMol(*molSim->getMol());
 	ExplicitBitVect* fp2 = RDKit::RDKFingerprintMol(*mol->getMol());
 	lblSim->setText(QString::number(TanimotoSimilarity(*fp1, *fp2),'g',3));

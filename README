@@ -4,6 +4,7 @@ Features:
   - supported formats: SDF, SMILES
   - export to SVG
   - molecular descriptors
+  - calculation of chemical similarity 
 	
 Third Party Software:
  - Qt 4.8.6 License: LGPL v2.1
