@@ -1,4 +1,4 @@
-VERSION = 0.6.1
+VERSION = 0.7.0
 
 VERSTR = '\\"$${VERSION}\\"'
 DEFINES += _VER=\"$${VERSTR}\"

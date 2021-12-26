@@ -21,7 +21,7 @@
 #ifndef MAINWINDOW_H_
 #define MAINWINDOW_H_
 
-#include <QtGui>
+#include <QtWidgets>
 #include <QtSvg>
 
 #include "ui_MainWindow.h"
@@ -59,12 +59,12 @@ protected:
 public slots:
 	void contextMenuRequested(const QPoint&);
 	void importSmiles();
+	void importSimilarity();
 	void importSDF();
 	void showAbout();
 	void showMol();
 	void saveMol();
 	void deleteMol();
-	void setMol();
 	void back();
 	void next();
 	void first();

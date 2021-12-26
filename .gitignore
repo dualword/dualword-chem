@@ -1,10 +1,11 @@
+#
+dualword-chem
+.build
+Makefile
+.qmake.stash
 
+#
 /.cproject
 /.project
 /.externalToolBuilders
 /.settings
-
-dualword-chem
-.build
-Makefile
-

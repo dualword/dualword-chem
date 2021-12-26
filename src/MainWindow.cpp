@@ -76,12 +76,12 @@ MainWindow::MainWindow(QWidget *p, Qt::WindowFlags f) : QMainWindow(p, f), loade
     connect(actionDeleteAll,SIGNAL(triggered()), SLOT(deleteAll()));
     connect(actionAbout,SIGNAL(triggered()), SLOT(showAbout()));
     connect(actionConsole,SIGNAL(toggled(bool)), console, SLOT(setVisible(bool)));
-    connect(actSim,SIGNAL(triggered()), SLOT(setMol()));
+    connect(actSim,SIGNAL(triggered()), SLOT(importSimilarity()));
 	QStringList list;
 	list.push_back("Property");
 	list.push_back("Value");
 	tbl->setHorizontalHeaderLabels(list);
-	tbl->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+	tbl->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	connect(bBack,SIGNAL(clicked()), SLOT(back()));
 	connect(bNext,SIGNAL(clicked()), SLOT(next()));
 	connect(bFirst,SIGNAL(clicked()), SLOT(first()));
@@ -213,7 +213,7 @@ void MainWindow::showAbout(){
 	str.append(" ").append(qApp->applicationVersion()).append("<br>");
 	str.append("License: GPL v3 <br/>");
 	str.append("Website: <a href='http://github.com/dualword/dualword-chem'>Dualword-chem</a> <br/>");
-	str.append("&copy;2021 Alexander Busorgin <br/>");
+	str.append("&copy;2016-2021 Alexander Busorgin <br/>");
 	QMessageBox::about(this, tr("About"), str );
 }
 
@@ -239,7 +239,7 @@ void MainWindow::importSmiles(){
 	}
 }
 
-void MainWindow::setMol(){
+void MainWindow::importSimilarity(){
 	bool ok;
 	QString text = QInputDialog::getText(this, 0, tr("Enter SMILES"), QLineEdit::Normal, "", &ok);
 
@@ -311,10 +311,13 @@ void MainWindow::refresh(){
 		mol = list.at(idx).data();
 		showMol();
 	}
+
 	if(molSim.isNull() || !mol) return;
-	ExplicitBitVect* fp1 = RDKit::RDKFingerprintMol(*molSim->getMol());
-	ExplicitBitVect* fp2 = RDKit::RDKFingerprintMol(*mol->getMol());
+	ExplicitBitVect *fp1 = RDKFingerprintMol(*molSim->getMol());
+	ExplicitBitVect *fp2 = RDKFingerprintMol(*mol->getMol());
 	lblSim->setText(QString::number(TanimotoSimilarity(*fp1, *fp2),'g',3));
+	delete fp1;
+	delete fp2;
 }
 
 void MainWindow::deleteMol(){
