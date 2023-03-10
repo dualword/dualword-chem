@@ -47,7 +47,7 @@ void Loader::run(){
 		try{
 			QSharedPointer<ROMol> m(suppl.next());
 			++count;
-			if(!m.data()){
+			if(!m.get()){
 				++err;
 				continue;
 			}

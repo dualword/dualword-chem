@@ -1,4 +1,4 @@
 How to build:
- - prerequisites: C++14 compiler, Qt 5.x.x, RDKit 2019.09.03
+ - prerequisites: C++11 compiler, Qt 5.11, RDKit 2019.09.03
  - qmake
  - make

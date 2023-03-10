@@ -29,6 +29,7 @@
 #include <GraphMol/FileParsers/MolSupplier.h>
 #include <GraphMol/Depictor/RDDepictor.h>
 #include <GraphMol/MolDraw2D/MolDraw2DSVG.h>
+#include <GraphMol/MolDraw2D/MolDraw2DUtils.h>
 #include <GraphMol/Descriptors/MolDescriptors.h>
 #include <GraphMol/FileParsers/MolFileStereochem.h>
 #include <GraphMol/Fingerprints/Fingerprints.h>
@@ -167,7 +168,7 @@ void MainWindow::showMol(){
 	double logp {0.0}, mr {0.0}, mw = Descriptors::calcAMW(*mol->getMol());
 	Descriptors::calcCrippenDescriptors(*mol->getMol(), logp, mr);
 	createRow("Formula",QString::fromStdString(Descriptors::calcMolFormula(*mol->getMol())),true);
-	addElements(m.data(), mw);
+	addElements(m.get(), mw);
 	createRow("Atoms",QString::number(m->getNumAtoms()));
 	createRow("Heavy Atoms",QString::number(m->getNumHeavyAtoms()));
 	createRow("Heteroatoms",QString::number(Descriptors::calcNumHeteroatoms(*mol->getMol())));
@@ -233,7 +234,7 @@ void MainWindow::importSmiles(){
 			idx = list.size()-1;
 			refresh();
 		} catch (const MolSanitizeException& e) {
-			QMessageBox::critical(this, tr("MolSanitizeException"), QString(e.message()) );
+			QMessageBox::critical(this, tr("MolSanitizeException"), QString(e.what()) );
 			return;
 		}
 	}
@@ -254,7 +255,7 @@ void MainWindow::importSimilarity(){
 			svg2->load(molSim->getSvg(scrollArea2->rect().width(),scrollArea2->rect().height()).toUtf8());
 			refresh();
 		} catch (const MolSanitizeException& e) {
-			QMessageBox::critical(this, tr("MolSanitizeException"), QString(e.message()) );
+			QMessageBox::critical(this, tr("MolSanitizeException"), QString(e.what()) );
 			return;
 		}
 	}
@@ -270,12 +271,12 @@ void MainWindow::importSDF(){
         QString fname = QString(d.selectedFiles().value(0));
         if(loader.isNull() || !loader->isRunning()){
         	loader.reset(new Loader(fname));
-        	connect(loader.data(),SIGNAL(finished()), SLOT(back()));
-        	connect(loader.data(),SIGNAL(loadMolecule(const  QSharedPointer<ROMol>&)),
+        	connect(loader.get(),SIGNAL(finished()), SLOT(back()));
+        	connect(loader.get(),SIGNAL(loadMolecule(const  QSharedPointer<ROMol>&)),
         			SLOT(loadMolecule(const QSharedPointer<ROMol>&)));
-        	connect(loader.data(),SIGNAL(showMessage(const QString&,int)),
+        	connect(loader.get(),SIGNAL(showMessage(const QString&,int)),
         			statusbar, SLOT(showMessage(const QString&,int)));
-        	connect(loader.data(),SIGNAL(errMessage(const QString&)), SLOT(log(const QString&)));
+        	connect(loader.get(),SIGNAL(errMessage(const QString&)), SLOT(log(const QString&)));
         	loader->start();
         }
     }
@@ -308,16 +309,35 @@ void MainWindow::last(){
 void MainWindow::refresh(){
 	if(list.size() > 0) {
 		lbl->setText(QString::number(idx+1)+ "/" +  QString::number(list.size()));
-		mol = list.at(idx).data();
+		mol = list.at(idx).get();
 		showMol();
 	}
 
 	if(molSim.isNull() || !mol) return;
-	ExplicitBitVect *fp1 = RDKFingerprintMol(*molSim->getMol());
-	ExplicitBitVect *fp2 = RDKFingerprintMol(*mol->getMol());
-	lblSim->setText(QString::number(TanimotoSimilarity(*fp1, *fp2),'g',3));
-	delete fp1;
-	delete fp2;
+	QScopedPointer<ExplicitBitVect> fp1(RDKFingerprintMol(*molSim->getMol()));
+	QScopedPointer<ExplicitBitVect> fp2(RDKFingerprintMol(*mol->getMol()));
+	lblSim->setText("Tanimoto: " + QString::number(TanimotoSimilarity(*fp1, *fp2),'g',3));
+
+	RWMol m(*mol->getMol());
+	MolDraw2DSVG s(svg3->rect().width(),svg3->rect().height());
+	MolDraw2DUtils::prepareMolForDrawing(m);
+	s.drawOptions().padding = 0.1;
+    MolDraw2DUtils::ContourParams cps;
+    cps.fillGrid = true;
+
+    const auto conf = m.getConformer();
+    std::vector<Point2D> vp(conf.getNumAtoms());
+    std::vector<double> h(conf.getNumAtoms(),0.5), w(conf.getNumAtoms()), l;
+    for (size_t i = 0; i < conf.getNumAtoms(); ++i) {
+      vp[i] = Point2D(conf.getAtomPos(i).x, conf.getAtomPos(i).y);
+      w[i] = PeriodicTable::getTable()->getRcovalent(m.getAtomWithIdx(i)->getAtomicNum());
+    }
+
+	MolDraw2DUtils::contourAndDrawGaussians(s,vp,h,w,5,l,cps);
+	s.drawOptions().clearBackground = false;
+	s.drawMolecule(m);
+	s.finishDrawing();
+	svg3->load(QString::fromStdString(s.getDrawingText()).toUtf8());
 }
 
 void MainWindow::deleteMol(){
@@ -337,13 +357,16 @@ void MainWindow::deleteAll(){
 	list.clear();
 	idx = 0;
 	deleteMol();
+	svg2->load(QByteArray(""));
+	svg3->load(QByteArray(""));
+	lblSim->clear();
 }
 
 void MainWindow::loadMolecule(const QSharedPointer<ROMol>& p){
 	try{
 		QString s = QString::fromStdString(MolToSmiles(*p));
 		QScopedPointer<RWMol> rwm(SmilesToMol(s.toStdString()));
-		QSharedPointer<Mol<ROMol>> m(new Mol<ROMol>(s, new ROMol(*p.data())));
+		QSharedPointer<Mol<ROMol>> m(new Mol<ROMol>(s, new ROMol(*p.get())));
 		if(!m->getMol()) return;
 		list.push_back(m);
 		lbl->setText(QString::number(idx++)+ "/" +  QString::number(list.size()));

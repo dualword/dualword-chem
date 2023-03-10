@@ -29,9 +29,15 @@
      </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,10">
+     <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="5,10">
+      <property name="spacing">
+       <number>1</number>
+      </property>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0">
+       <layout class="QVBoxLayout" name="verticalLayout_3" stretch="5,4,1">
+        <property name="spacing">
+         <number>1</number>
+        </property>
         <item>
          <widget class="QScrollArea" name="scrollArea2">
           <property name="widgetResizable">
@@ -42,12 +48,15 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>82</width>
-             <height>143</height>
+             <width>172</width>
+             <height>92</height>
             </rect>
            </property>
           </widget>
          </widget>
+        </item>
+        <item>
+         <widget class="QSvgWidget" name="svg3" native="true"/>
         </item>
         <item>
          <widget class="QLabel" name="lblSim">
@@ -62,6 +71,9 @@
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0">
+          <property name="spacing">
+           <number>1</number>
+          </property>
           <item>
            <widget class="QScrollArea" name="scrollArea">
             <property name="focusPolicy">
@@ -75,8 +87,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>227</width>
-               <height>129</height>
+               <width>147</width>
+               <height>146</height>
               </rect>
              </property>
              <property name="contextMenuPolicy">
@@ -198,7 +210,7 @@
      <x>0</x>
      <y>0</y>
      <width>607</width>
-     <height>29</height>
+     <height>27</height>
     </rect>
    </property>
   </widget>
@@ -285,7 +297,7 @@
     <string>Sim</string>
    </property>
    <property name="toolTip">
-    <string>Similarity</string>
+    <string>Import Similarity</string>
    </property>
   </action>
  </widget>

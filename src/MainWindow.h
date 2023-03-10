@@ -37,7 +37,7 @@ public:
 	Mol(const QString&, T*);
 	virtual ~Mol();
 	QString getSvg(int w, int h);
-	const T* getMol() const {return m.data();};
+	const T* getMol() const {return m.get();};
 	const QString& getSmiles() const {return smiles;}
 
 private:
