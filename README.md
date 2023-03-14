@@ -1,10 +1,10 @@
-DualWord-chem - open-source chemical viewer.
+DualWord-chem - open-source 2D chemical viewer.
 
 Features:  
  - supported formats: SDF, SMILES  
  - export to SVG  
  - molecular descriptors  
- - calculation of chemical similarity  
+ - chemical similarity, similarity maps  
 	
 Third Party Software:  
  - Qt License: LGPL v3  

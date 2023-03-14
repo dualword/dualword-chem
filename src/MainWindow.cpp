@@ -107,6 +107,7 @@ MainWindow::MainWindow(QWidget *p, Qt::WindowFlags f) : QMainWindow(p, f), loade
 	connect(a,SIGNAL(triggered()), SLOT(showAbout()));
 	svg->installEventFilter(this);
 	connect(svg,SIGNAL(customContextMenuRequested(const QPoint&)), SLOT(contextMenuRequested(const QPoint&)));
+	connect(btnSim, QOverload<int>::of(&QCheckBox::stateChanged), [=](int i) {refresh();});
 }
 
 MainWindow::~MainWindow() {}
@@ -313,40 +314,51 @@ void MainWindow::refresh(){
 	}
 
 	if(molSim.isNull() || !mol) return;
-	RWMol m(*mol->getMol());
-	MolDraw2DUtils::prepareMolForDrawing(m);
-	std::vector<std::vector<std::uint32_t>> info(m.getNumAtoms());
-	QScopedPointer<ExplicitBitVect> fp1(RDKFingerprintMol(*molSim->getMol()));
-	QScopedPointer<ExplicitBitVect> fp2(RDKFingerprintMol(*mol->getMol(), 1,7,2048,2,true,0.0,128,true,true,0,0,&info));
-	lblSim->setText("Similarity: " + QString::number(TanimotoSimilarity(*fp1, *fp2),'g',3));
+	RWMol m1, m2;
+	if(btnSim->isChecked()) {
+		m1 = *molSim->getMol();
+		m2 = *mol->getMol();
+	}else {
+		m1 = *mol->getMol();
+		m2 = *molSim->getMol();
+	}
+	try {
+		MolDraw2DUtils::prepareMolForDrawing(m1);
+		MolDraw2DUtils::prepareMolForDrawing(m2);
+		std::vector<std::vector<std::uint32_t>> info(m1.getNumAtoms());
+		QScopedPointer<ExplicitBitVect> fp1(RDKFingerprintMol(m2));
+		QScopedPointer<ExplicitBitVect> fp2(RDKFingerprintMol(m1, 1,7,2048,2,true,0.0,128,true,true,0,0,&info));
+		lblSim->setText("Similarity: " + QString::number(TanimotoSimilarity(*fp1, *fp2),'g',3));
 
-	MolDraw2DSVG s(svg3->rect().width(),svg3->rect().height());
-	s.drawOptions().padding = 0.1;
-    MolDraw2DUtils::ContourParams cps;
-    cps.fillGrid = true;
-    cps.gridResolution=0.1;
-    cps.extraGridPadding=0.5;
+		MolDraw2DSVG s(svg3->rect().width(),svg3->rect().height());
+		s.drawOptions().padding = 0.1;
+		MolDraw2DUtils::ContourParams cps;
+		cps.fillGrid = true;
+		cps.gridResolution=0.1;
+		cps.extraGridPadding=0.5;
 
-    double refsim = DiceSimilarity(*fp1, *fp2);
-    const auto conf = m.getConformer();
-    std::vector<Point2D> vp(m.getNumAtoms());
-    std::vector<double> h(m.getNumAtoms()), w(m.getNumAtoms()), l;
-    for (size_t i = 0; i < m.getNumAtoms(); i++) {
-		vp[i] = Point2D(conf.getAtomPos(i).x, conf.getAtomPos(i).y);
-		QScopedPointer<ExplicitBitVect> newfp(new ExplicitBitVect(*fp2));
-		for (uint j = 0; j < info[i].size(); j++) {
-		  newfp->unsetBit(info[i][j]);
+		double refsim = DiceSimilarity(*fp1, *fp2);
+		const auto conf = m1.getConformer();
+		std::vector<Point2D> vp(conf.getNumAtoms());
+		std::vector<double> h(conf.getNumAtoms()), w(conf.getNumAtoms()), l;
+		for (size_t i = 0; i < conf.getNumAtoms(); i++) {
+			vp[i] = Point2D(conf.getAtomPos(i).x, conf.getAtomPos(i).y);
+			QScopedPointer<ExplicitBitVect> newfp(new ExplicitBitVect(*fp2));
+			for (size_t j = 0; j < info[i].size(); j++) {
+			  newfp->unsetBit(info[i][j]);
+			}
+			h[i] = refsim - DiceSimilarity(*fp1, *newfp);
+			w[i] = 0.5 * PeriodicTable::getTable()->getRcovalent(m1.getAtomWithIdx(i)->getAtomicNum());
 		}
-		double newsim = DiceSimilarity(*fp1, *newfp);
-		h[i] = refsim - newsim;
-		w[i] = 0.5 * PeriodicTable::getTable()->getRcovalent(m.getAtomWithIdx(i)->getAtomicNum());
-    }
 
-	MolDraw2DUtils::contourAndDrawGaussians(s,vp,h,w,10,l,cps);
-	s.drawOptions().clearBackground = false;
-	s.drawMolecule(m);
-	s.finishDrawing();
-	svg3->load(QString::fromStdString(s.getDrawingText()).toUtf8());
+		MolDraw2DUtils::contourAndDrawGaussians(s,vp,h,w,10,l,cps);
+		s.drawOptions().clearBackground = false;
+		s.drawMolecule(m1);
+		s.finishDrawing();
+		svg3->load(QString::fromStdString(s.getDrawingText()).toUtf8());
+	}catch (const ConformerException& e) {
+		//
+	}
 }
 
 void MainWindow::deleteMol(){
