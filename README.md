@@ -12,6 +12,5 @@ Third Party Software:
 
 License: GNU GENERAL PUBLIC LICENSE Version 3  
 Source code: https://github.com/dualword/dualword-chem  
-Files: https://sourceforge.net/projects/dualword-chem  
 
 ![Screenshot](etc/screenshot/dualword-chem.png)
