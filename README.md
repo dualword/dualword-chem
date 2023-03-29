@@ -14,5 +14,5 @@ License: GNU GENERAL PUBLIC LICENSE Version 3
 Source code: https://github.com/dualword/dualword-chem  
 
 <p align="center">
-<img src="etc/screenshot/dualword-chem.png" width="150" />
+<img src="etc/screenshot/dualword-chem.png" width="150"/>
 </p>
