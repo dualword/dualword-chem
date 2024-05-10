@@ -1,5 +1,5 @@
 /*
- *	Copyright (C) 2016 Alexander Busorgin
+ *	Copyright (C) 2016-2024 Alexander Busorgin
  *
  *	This file is part of DualWord-chem.
  *
@@ -54,7 +54,7 @@ QString Mol<T>::getSvg(int w, int h){
 	return QString::fromStdString(s.getDrawingText());
 }
 
-MainWindow::MainWindow(QWidget *p, Qt::WindowFlags f) : QMainWindow(p, f), loader(nullptr), idx(0),
+MainWindow::MainWindow(QWidget *p) : QMainWindow(p), loader(nullptr), idx(0),
 		mol(nullptr), molSim(nullptr) {
 
 	setupUi(this);
@@ -142,7 +142,6 @@ void MainWindow::saveMol(){
 	if(!mol) return;
 	QFileDialog d(this,tr("Choose directory"), QDir::homePath());
 	d.setFilter(QDir::Dirs | QDir::Hidden);
-	d.setFileMode(QFileDialog::DirectoryOnly);
 	d.setViewMode(QFileDialog::List);
 	d.setOption(QFileDialog::ShowDirsOnly,true);
 	d.setOption(QFileDialog::ReadOnly,true);
@@ -214,7 +213,7 @@ void MainWindow::showAbout(){
 	str.append(" ").append(qApp->applicationVersion()).append("<br>");
 	str.append("License: GPL v3 <br/>");
 	str.append("Website: <a href='http://github.com/dualword/dualword-chem'>Dualword-chem</a> <br/>");
-	str.append("&copy;2016-2023 Alexander Busorgin <br/>");
+    str.append("&copy;2016-2024 Alexander Busorgin <br/>");
 	QMessageBox::about(this, tr("About"), str );
 }
 

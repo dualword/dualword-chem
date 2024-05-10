@@ -1,5 +1,5 @@
 /*
- *	Copyright (C) 2016 Alexander Busorgin
+ *	Copyright (C) 2016-2024 Alexander Busorgin
  *
  *	This file is part of DualWord-chem.
  *
@@ -49,7 +49,7 @@ class MainWindow : public QMainWindow, private Ui::MainWindowForm {
   Q_OBJECT
 
 public:
-	MainWindow(QWidget *p = 0, Qt::WindowFlags f = 0);
+    MainWindow(QWidget *p = 0);
 	virtual ~MainWindow();
 
 protected:
