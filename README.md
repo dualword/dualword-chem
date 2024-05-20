@@ -1,4 +1,4 @@
-DualWord-chem - open-source 2D chemical viewer.
+DualWord-chem - open-source 2D chemical viewer (C++, Qt, RDKit).
 
 Features:  
  - supported formats: SDF, SMILES  
