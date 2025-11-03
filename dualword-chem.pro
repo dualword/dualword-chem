@@ -1,5 +1,5 @@
-lessThan(QT_VERSION, 5.0) {
-	error('Qt 5.0+ required...')
+lessThan(QT_VERSION, 6.0) {
+        error('Qt 6.0+ required...')
 }
 
 TEMPLATE = subdirs

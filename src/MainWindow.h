@@ -1,5 +1,5 @@
 /*
- *	Copyright (C) 2016-2024 Alexander Busorgin
+ *	Copyright (C) 2016-2025 Alexander Busorgin
  *
  *	This file is part of DualWord-chem.
  *
@@ -22,7 +22,7 @@
 #define MAINWINDOW_H_
 
 #include <QtWidgets>
-#include <QtSvg>
+#include <QSvgWidget>
 
 #include "ui_MainWindow.h"
 
